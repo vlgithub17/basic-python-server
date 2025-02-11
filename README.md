@@ -1,6 +1,6 @@
 # Basic Python Server
 
-This is a basic python http server
+This is a basic Python HTTP server
 
 ## How to run:
 
@@ -18,6 +18,6 @@ python3 bps.py 3300
 
 ## Basic usage
 
-Basic python server serves files from GET requests.
+This Basic Python Server simply hosts and serves files from the current project directory through HTTP.
 
-POST /info request will response a pinged post data with a message.
+POST /info request will response a ponged post data with an additional message.
