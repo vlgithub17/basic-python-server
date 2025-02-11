@@ -2,6 +2,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 import os
 import mimetypes
+import sys
 
 PORT_NUMBER = 3300
 
@@ -17,6 +18,7 @@ def return_error(self, msg=""):
     self.send_header("Access-Control-Allow-Methods", "GET, OPTIONS, POST")
     self.send_header("Access-Control-Allow-Headers", "*")
     self.end_headers()
+    
     err_msg = "ERROR: " + str(msg)
     self.wfile.write(err_msg.encode("utf-8"))
 
@@ -90,11 +92,20 @@ class MyServer(BaseHTTPRequestHandler):
 
         return
     
-myServer = HTTPServer(("", PORT_NUMBER), MyServer)
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        try:
+            PORT_NUMBER = int(sys.argv[1])
+        except ValueError:
+            print("Invalid port number. Using default port:", PORT_NUMBER)
+    else:
+        print("No port number provided. Using default port:", PORT_NUMBER)
 
-try:
-    print("starting http server...")
-    myServer.serve_forever()
-except KeyboardInterrupt:
-    myServer.server_close()
-    print("stopped http server...")
+    myServer = HTTPServer(("", PORT_NUMBER), MyServer)
+
+    try:
+        print(f"Starting HTTP server on port {PORT_NUMBER}...")
+        myServer.serve_forever()
+    except KeyboardInterrupt:
+        myServer.server_close()
+        print("Stopped HTTP server...")
