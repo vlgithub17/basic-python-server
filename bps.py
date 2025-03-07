@@ -4,7 +4,7 @@ import os
 import mimetypes
 import sys
 
-PORT_NUMBER = 3300
+PORT_NUMBER = 3000
 
 class CustomError(Exception):
     def __init__(self, message):
@@ -31,16 +31,23 @@ def respond_json(self, data):
     self.wfile.write(json.dumps(data).encode("utf-8"))
 
 def respond_file(self, file_path):
-    if os.path.isfile(file_path):
-        mime_type, _ = mimetypes.guess_type(file_path)
-
+    base_path = os.path.join(os.path.dirname(__file__), '../groupware/dist')
+    full_path = os.path.join(base_path, file_path)
+    
+    if not os.path.isfile(full_path):
+        print(f"File not found: {full_path}. Serving index.html instead.")
+        full_path = os.path.join(base_path, "index.html")
+    
+    if os.path.isfile(full_path):
+        print(f"Serving file: {full_path}")
+        mime_type, _ = mimetypes.guess_type(full_path)
         if not mime_type:
             mime_type = "application/octet-stream"
-
-    set_headers(self, 200, [("Content-type", mime_type)])
-
-    with open(file_path, "rb") as file:
-        self.wfile.write(file.read())
+        set_headers(self, 200, [("Content-type", mime_type)])
+        with open(full_path, "rb") as file:
+            self.wfile.write(file.read())
+    else:
+        return_error(self, "File not found")
 
 class MyServer(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
@@ -77,11 +84,7 @@ class MyServer(BaseHTTPRequestHandler):
 
     def do_GET(self):
         file_path = self.path.lstrip("/")
-        if os.path.isfile(file_path):
-            respond_file(self, file_path)
-
-        else:
-            return_error(self, "File not found")
+        respond_file(self, file_path)
 
         return
     
